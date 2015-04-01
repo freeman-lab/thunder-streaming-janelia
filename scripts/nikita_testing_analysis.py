@@ -85,7 +85,7 @@ behav_viz = lgn.linestreaming(zeros((1, 1)), size=3)
 analysis1 = Analysis.SeriesBatchMeanAnalysis(input=dirs['input'], output=os.path.join(dirs['output'], 'images'), prefix="output", format="binary")\
                     .toImage(dims=(41, 1024, 2048))\
                     .toLightning(image_viz, behav_viz, only_viz=True, plane=10)
-analysis2 = Analysis.SeriesFilteringRegressionAnalysis(input=dirs['input'], output=output=os.path.join(dirs['output'], 'regressed_series'),
+analysis2 = Analysis.SeriesFilteringRegressionAnalysis(input=dirs['input'], output=os.path.join(dirs['output'], 'regressed_series'),
                                                         prefix="regressed", format="binary", partition_size="6", dims=str([41, 1024, 2048]),
                                                         num_regressors="3")\
                     .toSeries().toLightning(regression_viz, only_viz=True)
