@@ -40,18 +40,18 @@ run_params = {
     "checkpoint_interval": 10000, 
     "hadoop_block_size": 1, 
     "parallelism": 320, 
-    "master": "spark://h08u19.int.janelia.org:7077",
+    "master": "spark://h08u01.int.janelia.org:7077",
     "batch_time": 20,
     "executor_memory": "80g"
 }
 
 feeder_params = { 
-    "images_dir": "/nobackup/freeman/andrew/nikitatest/raw/", 
-    "behaviors_dir": "/nobackup/freeman/andrew/nikitatest/ephysSplitted/",
+    "images_dir": "/tier2/ahrens/Nikita/realtime/imaging/", 
+    "behaviors_dir": "/tier2/ahrens/Nikita/realtime/ephys/",
     "linger_time": -1, 
-    "max_files": 20, 
+    "max_files": 40, 
     "mod_buffer_time": 5,
-    "poll_time": 10,
+    "poll_time": 5,
     "check_size": None,
     "tmp": dirs['temp'],
     "spark_input_dir": dirs['input']
@@ -78,29 +78,38 @@ test_data_params = {
 lgn = Lightning("http://kafka1.int.janelia.org:3000/")
 lgn.create_session('nikita_test')
 
-image_viz = lgn.imagedraw(zeros((2048, 1024)))
-regression_viz = lgn.linestreaming(zeros((1, 1)), size=3)
+image_size = (512, 512)
+dims = [41, 1024, 2048]
+image_viz = lgn.imagedraw(zeros(image_size))
+r2_viz = lgn.imagedraw(zeros(image_size))
+#regression_viz = lgn.linestreaming(zeros((1, 1)), size=3)
 behav_viz = lgn.linestreaming(zeros((1, 1)), size=3)
 
 analysis1 = Analysis.SeriesBatchMeanAnalysis(input=dirs['input'], output=os.path.join(dirs['output'], 'images'), prefix="output", format="binary")\
-                    .toImage(dims=(41, 1024, 2048))\
-                    .toLightning(image_viz, behav_viz, only_viz=True, plane=10)
-analysis2 = Analysis.SeriesFilteringRegressionAnalysis(input=dirs['input'], output=os.path.join(dirs['output'], 'regressed_series'),
-                                                        prefix="regressed", format="binary", partition_size="6", dims=str([41, 1024, 2048]),
-                                                        num_regressors="3")\
-                    .toSeries().toLightning(regression_viz, only_viz=True)
+                    .toImage(dims=tuple(dims))\
+                    .toLightning(image_viz, image_size, only_viz=True, plane=10)
+analysis2 = Analysis.SeriesRegressionAnalysis(input=dirs['input'], output=os.path.join(dirs['output'], 'r_squared'),
+                                              prefix="r", format="binary", dims=str(dims), num_regressors="3",
+                                              selected="1")\
+                    .toImage(dims=tuple(dims))\
+                    .toLightning(r2_viz, only_viz=True)
+
+#analysis2 = Analysis.SeriesFilteringRegressionAnalysis(input=dirs['input'], output=os.path.join(dirs['output'], 'fitted_series'),
+#                                                        prefix="fitted", format="binary", partition_size="6", dims=str([41, 1024, 2048]),
+#                                                        num_regressors="3")\
+#                    .toSeries().toLightning(regression_viz, only_viz=True)
 
 #analysis2 = Analysis.SeriesFiltering2Analysis(input=dirs['input'], output=os.path.join(dirs['output'], 'filtered_series'), prefix="output", format="binary", partition_size="6", dims=str([2048, 1024, 41])).toSeries().toLightning(line_viz, only_viz=True)
 #analysis3 = Analysis.SeriesNoopAnalysis(input=dirs['input'], output=os.path.join(dirs['output'], 'no_means'), prefix="output", format="binary").toImage(dims=(512,512), plane=0).toLightning(no_mean_viz, only_viz=True)
 
-analysis2.receive_updates(analysis1)
+#analysis2.receive_updates(analysis1)
 
 tssc.add_analysis(analysis1)
 tssc.add_analysis(analysis2)
 #tssc.add_analysis(analysis3)
 
 updaters = [
-    LightningUpdater(tssc, image_viz, analysis1.identifier)
+#    LightningUpdater(tssc, image_viz, analysis1.identifier)
 ]
 
 for updater in updaters: 
@@ -201,6 +210,6 @@ def run(feeder=None):
         copy_data()
     else: 
         print "Copying data into feeder script's input directories..."
-        launch_copier(copy_delay)
+        #launch_copier(copy_delay)
 
 
