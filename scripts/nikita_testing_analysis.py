@@ -40,7 +40,7 @@ run_params = {
     "checkpoint_interval": 10000, 
     "hadoop_block_size": 1, 
     "parallelism": 320, 
-    "master": "spark://h07u21.int.janelia.org:7077",
+    "master": "spark://h08u19.int.janelia.org:7077",
     "batch_time": 20,
     "executor_memory": "80g"
 }
@@ -79,24 +79,27 @@ lgn = Lightning("http://kafka1.int.janelia.org:3000/")
 lgn.create_session('nikita_test')
 
 image_viz = lgn.imagedraw(zeros((2048, 1024)))
-line_viz = lgn.linestreaming(zeros((1,1)), size=3)
+regression_viz = lgn.linestreaming(zeros((1, 1)), size=3)
+behav_viz = lgn.linestreaming(zeros((1, 1)), size=3)
 
 analysis1 = Analysis.SeriesBatchMeanAnalysis(input=dirs['input'], output=os.path.join(dirs['output'], 'images'), prefix="output", format="binary")\
-                        .toImage(dims=(41, 1024, 2048))\
-                        .toLightning(image_viz, only_viz=True, plane=10)\
-                        #.toFile(path=dirs['output'], prefix='output')
+                    .toImage(dims=(41, 1024, 2048))\
+                    .toLightning(image_viz, behav_viz, only_viz=True, plane=10)
+analysis2 = Analysis.SeriesFilteringRegressionAnalysis(input=dirs['input'], output=output=os.path.join(dirs['output'], 'regressed_series'),
+                                                        prefix="regressed", format="binary", partition_size="6", dims=str([41, 1024, 2048]))\
+                    .toSeries().toLightning(regression_viz, only_viz=True)
 
 #analysis2 = Analysis.SeriesFiltering2Analysis(input=dirs['input'], output=os.path.join(dirs['output'], 'filtered_series'), prefix="output", format="binary", partition_size="6", dims=str([2048, 1024, 41])).toSeries().toLightning(line_viz, only_viz=True)
 #analysis3 = Analysis.SeriesNoopAnalysis(input=dirs['input'], output=os.path.join(dirs['output'], 'no_means'), prefix="output", format="binary").toImage(dims=(512,512), plane=0).toLightning(no_mean_viz, only_viz=True)
 
-#analysis2.receive_updates(analysis1)
+analysis2.receive_updates(analysis1)
 
 tssc.add_analysis(analysis1)
-#tssc.add_analysis(analysis2)
+tssc.add_analysis(analysis2)
 #tssc.add_analysis(analysis3)
 
 updaters = [
-#    LightningUpdater(tssc, image_viz, analysis1.identifier)
+    LightningUpdater(tssc, image_viz, analysis1.identifier)
 ]
 
 for updater in updaters: 
