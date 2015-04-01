@@ -86,7 +86,8 @@ analysis1 = Analysis.SeriesBatchMeanAnalysis(input=dirs['input'], output=os.path
                     .toImage(dims=(41, 1024, 2048))\
                     .toLightning(image_viz, behav_viz, only_viz=True, plane=10)
 analysis2 = Analysis.SeriesFilteringRegressionAnalysis(input=dirs['input'], output=output=os.path.join(dirs['output'], 'regressed_series'),
-                                                        prefix="regressed", format="binary", partition_size="6", dims=str([41, 1024, 2048]))\
+                                                        prefix="regressed", format="binary", partition_size="6", dims=str([41, 1024, 2048]),
+                                                        num_regressors="3")\
                     .toSeries().toLightning(regression_viz, only_viz=True)
 
 #analysis2 = Analysis.SeriesFiltering2Analysis(input=dirs['input'], output=os.path.join(dirs['output'], 'filtered_series'), prefix="output", format="binary", partition_size="6", dims=str([2048, 1024, 41])).toSeries().toLightning(line_viz, only_viz=True)
