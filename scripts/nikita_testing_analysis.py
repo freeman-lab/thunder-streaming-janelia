@@ -92,7 +92,7 @@ analysis2 = Analysis.SeriesRegressionAnalysis(input=dirs['input'], output=os.pat
                                               prefix="r", format="binary", dims=str(dims), num_regressors="3",
                                               selected="1")\
                     .toImage(dims=tuple(dims))\
-                    .toLightning(r2_viz, only_viz=True)
+                    .toLightning(r2_viz, image_size, only_viz=True)
 
 #analysis2 = Analysis.SeriesFilteringRegressionAnalysis(input=dirs['input'], output=os.path.join(dirs['output'], 'fitted_series'),
 #                                                        prefix="fitted", format="binary", partition_size="6", dims=str([41, 1024, 2048]),
