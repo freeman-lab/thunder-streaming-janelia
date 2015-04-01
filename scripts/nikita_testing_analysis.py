@@ -46,8 +46,8 @@ run_params = {
 }
 
 feeder_params = { 
-    "images_dir": "/tier2/ahrens/Nikita/realtime/imaging/", 
-    "behaviors_dir": "/tier2/ahrens/Nikita/realtime/ephys/",
+    "images_dir": "/nobackup/freeman/andrew/nikitatest/raw/", 
+    "behaviors_dir": "/nobackup/freeman/andrew/nikitatest/ephysSplitted/",
     "linger_time": -1, 
     "max_files": 40, 
     "mod_buffer_time": 5,
@@ -210,6 +210,6 @@ def run(feeder=None):
         copy_data()
     else: 
         print "Copying data into feeder script's input directories..."
-        #launch_copier(copy_delay)
+        launch_copier(copy_delay)
 
 
