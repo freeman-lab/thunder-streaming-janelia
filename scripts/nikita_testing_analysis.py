@@ -39,9 +39,9 @@ dirs = {
 run_params = { 
     "checkpoint_interval": 10000, 
     "hadoop_block_size": 1, 
-    "parallelism": 320, 
+    "parallelism": 640, 
     "master": "spark://h08u01.int.janelia.org:7077",
-    "batch_time": 20,
+    "batch_time": 30,
     "executor_memory": "80g"
 }
 
@@ -86,13 +86,13 @@ r2_viz = lgn.imagedraw(zeros(image_size))
 behav_viz = lgn.linestreaming(zeros((1, 1)), size=3)
 
 analysis1 = Analysis.SeriesBatchMeanAnalysis(input=dirs['input'], output=os.path.join(dirs['output'], 'images'), prefix="output", format="binary")\
-                    .toImage(dims=tuple(dims))\
+                    .toImage(dims=tuple(dims), preslice=slice(0, -3, 1))\
                     .toLightning(image_viz, image_size, only_viz=True, plane=10)
 analysis2 = Analysis.SeriesRegressionAnalysis(input=dirs['input'], output=os.path.join(dirs['output'], 'r_squared'),
                                               prefix="r", format="binary", dims=str(dims), num_regressors="3",
                                               selected="1")\
                     .toImage(dims=tuple(dims))\
-                    .toLightning(r2_viz, image_size, only_viz=True)
+                    .toLightning(r2_viz, image_size, only_viz=True, plane=10)
 
 #analysis2 = Analysis.SeriesFilteringRegressionAnalysis(input=dirs['input'], output=os.path.join(dirs['output'], 'fitted_series'),
 #                                                        prefix="fitted", format="binary", partition_size="6", dims=str([41, 1024, 2048]),
