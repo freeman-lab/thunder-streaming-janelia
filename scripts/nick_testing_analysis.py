@@ -44,7 +44,7 @@ run_params = {
 }
 
 feeder_params = { 
-	"name": "nikitas",
+	"name": "nicks",
     "linger_time": -1, 
     "max_files": 10, 
     "poll_time": 5
