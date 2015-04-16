@@ -1,6 +1,6 @@
 from thunder_streaming.shell.examples.lightning_updater import LightningUpdater
 from thunder_streaming.site.configurations import *
-from thunder_streaming_janelia.scripts.tester_base import AnalysisPipeline
+from tester_base import AnalysisPipeline
 from lightning import Lightning
 from numpy import zeros
 import os

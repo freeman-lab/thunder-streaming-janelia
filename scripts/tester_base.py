@@ -64,7 +64,7 @@ class AnalysisPipeline(object):
 
         self.feeder_params = {
             "images_dir": self.dirs["images"],
-            "behaviors_dir": self.dirs["behaviors"]
+            "behaviors_dir": self.dirs["behaviors"],
             "tmp": self.dirs["temp"],
             "spark_input_dir": self.dirs["input"]
         }
