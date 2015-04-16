@@ -11,7 +11,7 @@ class NicksAnalysis(AnalysisPipeline):
     DATA_PATH = "/groups/freeman/freemanlab/Streaming/anm_0216166_2013_07_17_run_01/"
 
     def __init__(self, input_path, output_path):
-        super.__init__(self, input_path, output_path)
+        super(NicksAnalysis, self).__init__(input_path, output_path)
         self.run_params.update({
             "parallelism": 320,
             "batch_time": 10,
