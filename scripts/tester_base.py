@@ -1,5 +1,5 @@
 from thunder_streaming.shell.examples.lightning_updater import LightningUpdater
-from thunder_streaming.site.configurations import *
+from thunder_streaming.shell.feeder_configuration import FeederConfiguration
 from subprocess import Popen
 import os
 import glob
@@ -137,7 +137,7 @@ class AnalysisPipeline(object):
         pass
 
     def _make_feeder(self):
-        conf = {}
+        conf = FeederConfiguration()
         for key, value in self.feeder_params.items():
             if value is not None: 
                 conf.__dict__['set_'+key](value)
