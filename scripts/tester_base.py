@@ -136,7 +136,7 @@ class AnalysisPipeline(object):
     def _generate_raw_test_data(self):
         pass
 
-    def _make_feeder():
+    def _make_feeder(self):
         conf = {}
         for key, value in self.feeder_params.items():
             if value is not None: 
