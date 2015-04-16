@@ -22,6 +22,8 @@ class NicksAnalysis(AnalysisPipeline):
             "max_files": -1,
             "mod_buffer_time": 5,
             "poll_time": 5,
+            "image_prefix": "images",
+            "behaviors_prefix": "behaviours"
         })
 
         self.copier_params.update({
