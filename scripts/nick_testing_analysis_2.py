@@ -15,6 +15,8 @@ import signal
 
 SAMPLE_DIR = "/tier2/freeman/streaming/sample_data/" 
 
+DATA_PATH = "/groups/freeman/freemanlab/Streaming/anm_0216166_2013_07_17_run_01/registered_im/"
+
 class NicksAnalysis(AnalysisPipeline): 
 
     dirs = {
@@ -48,8 +50,8 @@ class NicksAnalysis(AnalysisPipeline):
     }
 
     copier_params = { 
-        "images_dir": "/nobackup/freeman/andrew/nikitatest/rawTemp/",
-        "behaviors_dir": "/nobackup/freeman/andrew/nikitatest/ephysTemp/"
+        "images_dir": os.path.join(DATA_PATH, "registered_im"),
+        "behaviors_dir": os.path.join(DATA_PATH, "registered_bv")
     }
 
     test_data_params = { 
