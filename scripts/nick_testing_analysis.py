@@ -26,14 +26,7 @@ def new_handler(signum, stack):
 signal.signal(signal.SIGINT, new_handler) 
 signal.signal(signal.SIGTERM, new_handler)
 
-dirs = {
-    "checkpoint": os.path.join(SAMPLE_DIR, "checkpoint"),
-    "input": os.path.join(SAMPLE_DIR, "streaminginput"),
-    "output": os.path.join(SAMPLE_DIR, "streamingoutput"),
-    "images": os.path.join(SAMPLE_DIR, "images"),
-    "behaviors": os.path.join(SAMPLE_DIR, "behaviors"),
-    "temp": os.path.join(SAMPLE_DIR, "temp")
-}
+
 
 run_params = { 
     "checkpoint_interval": 10000, 

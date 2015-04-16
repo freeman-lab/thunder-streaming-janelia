@@ -13,54 +13,38 @@ import random
 import time
 import signal
 
-SAMPLE_DIR = "/tier2/freeman/streaming/sample_data/" 
 
-DATA_PATH = "/groups/freeman/freemanlab/Streaming/anm_0216166_2013_07_17_run_01/registered_im/"
+class NicksAnalysis(AnalysisPipeline):
 
-class NicksAnalysis(AnalysisPipeline): 
+    SAMPLE_DIR = "/tier2/freeman/streaming/sample_data/"
+    DATA_PATH = "/groups/freeman/freemanlab/Streaming/anm_0216166_2013_07_17_run_01/"
 
-    dirs = {
-        "checkpoint": os.path.join(SAMPLE_DIR, "checkpoint"),
-        "input": os.path.join(SAMPLE_DIR, "streaminginput"),
-        "output": os.path.join(SAMPLE_DIR, "streamingoutput"),
-        "images": os.path.join(SAMPLE_DIR, "images"),
-        "behaviors": os.path.join(SAMPLE_DIR, "behaviors"),
-        "temp": os.path.join(SAMPLE_DIR, "temp")
-    }
+    def __init__(self, input_path, output_path):
+        super.__init__(self, input_path, output_path)
+        self.run_params.update({
+            "parallelism": 320,
+            "batch_time": 10,
+        })
 
-    run_params = { 
-        "checkpoint_interval": 10000, 
-        "hadoop_block_size": 1, 
-        "parallelism": 320,
-        "master": "spark://h05u24.int.janelia.org:7077",
-        "batch_time": 10,
-        "executor_memory": "90g"
-    }
+        self.feeder_params.update({
+            "linger_time": -1,
+            "max_files": -1,
+            "mod_buffer_time": 5,
+            "poll_time": 5,
+        })
 
-    feeder_params = { 
-        "images_dir": "/nobackup/freeman/andrew/nikitatest/raw/", 
-        "behaviors_dir": "/nobackup/freeman/andrew/nikitatest/ephysSplitted/",
-        "linger_time": -1, 
-        "max_files": -1,
-        "mod_buffer_time": 5,
-        "poll_time": 5,
-        "check_size": None,
-        "tmp": self.dirs['temp'],
-        "spark_input_dir": self.dirs['input']
-    }
+        self.copier_params.update({
+            "images_dir": os.path.join(self.input_path, "registered_im"),
+            "behaviors_dir": os.path.join(self.input_path, "registered_bv")
+        })
 
-    copier_params = { 
-        "images_dir": os.path.join(DATA_PATH, "registered_im"),
-        "behaviors_dir": os.path.join(DATA_PATH, "registered_bv")
-    }
-
-    test_data_params = { 
-        "prefix": "input_",
-        "num_files": 100,
-        "approx_file_size": 5.0,
-        "records_per_file": 512 * 512,
-        "copy_period": 10
-    }
+        self.test_data_params.update({
+            "prefix": "input_",
+            "num_files": 100,
+            "approx_file_size": 5.0,
+            "records_per_file": 512 * 512,
+            "copy_period": 10
+        })
 
     def setup_pipeline(self): 
 

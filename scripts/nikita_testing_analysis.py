@@ -41,7 +41,6 @@ run_params = {
     "checkpoint_interval": 10000, 
     "hadoop_block_size": 1, 
     "parallelism": 640, 
-    "master": "spark://h05u24.int.janelia.org:7077",
     "batch_time": 30,
     "executor_memory": "80g"
 }

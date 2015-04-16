@@ -35,17 +35,60 @@ class AnalysisPipeline(object):
         to its initial state.
     """
 
-    dirs = {}
-    run_params = {}
-    feeder_params = {}
-    copier_params = {}
-    test_data_params = {}
+    # These fields MUST be overridden by subclasses
+    SAMPLE_DIR = None
+    DATA_PATH = None
+
+    @classmethod
+    def getInstance(cls):
+        """
+        Factory method for generating an AnalysisPipeline instance with the default input/output directories
+        """
+        return cls(cls.DATA_PATH, cls.SAMPLE_DIR)
+
+    def __init__(self, input_path, output_path):
+        self.input_path = input_path
+        self.output_path = output_path
+
+        self.dirs = {
+            "checkpoint": os.path.join(self.output_path, "checkpoint"),
+            "input": os.path.join(self.output_path, "streaminginput"),
+            "output": os.path.join(self.output_path, "streamingoutput"),
+            "images": os.path.join(self.output_path, "images"),
+            "behaviors": os.path.join(self.output_path, "behaviors"),
+            "temp": os.path.join(self.output_path, "temp")
+        }
+
+        self.run_params = {
+            "master": self._get_master(),
+            "executor_memory": "80g",
+            "checkpoint_interval": 10000,
+            "hadoop_block_size": 1
+        }
+
+        self.feeder_params = {
+            "images_dir": self.dirs["images"],
+            "behaviors_dir": self.dirs["behaviors"]
+            "tmp": self.dirs["temp"],
+            "spark_input_dir": self.dirs["input"]
+        }
+
+        self.copier_params = {}
+
+        self.test_data_params = {}
 
     def setup_pipeline(self): 
         """
         Abstract method
         """
         pass
+
+    def _get_master(self):
+        """
+        Parse the spark-master file to determine the URL of the master node
+        """
+        with open(os.path.expanduser('~/spark-master'), 'r') as f:
+            return f.read().strip()
 
     # Attach all the parameters in the dictionary aboves to their respective objects
     def _attach_parameters(self): 
