@@ -70,11 +70,10 @@ class NicksAnalysis(AnalysisPipeline):
         image_size = (512, 512)
         dims = [4, 512, 512]
         num_features = 2
-        num_selected = 2
+        num_selected = 1
         #image_viz = lgn.imagedraw(zeros(image_size))
         regression_viz = lgn.imagedraw(zeros(image_size))
-        #regression_viz = lgn.linestreaming(zeros((1, 1)), size=3)
-        behav_viz = lgn.linestreaming(zeros((1, 1)), size=3)
+        behav_viz = lgn.linestreaming(zeros((1, 1)), size=1)
 
         #analysis1 = Analysis.SeriesBatchMeanAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'images'), prefix="output", format="binary")\
         #                    .toImage(dims=tuple(dims), preslice=slice(0,-3,1))\
@@ -88,10 +87,11 @@ class NicksAnalysis(AnalysisPipeline):
         #                    .toImage(dims=tuple(dims))\
         #                    .toLightning(regression_viz, image_size, only_viz=True, plane=10)
 
-        analysis1 = Analysis.SeriesLinearRegressionAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'r_squared'),
-                                                      prefix="r", format="binary", dims=str(dims), num_regressors=num_features,
-                                                      selected=str([x for x in xrange(num_selected)]))\
+        analysis1 = Analysis.SeriesBinnedRegressionAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'weighted_mean'),
+                                                      prefix="m", format="binary", dims=str(dims), num_regressors=num_features,
+                                                      selected=str(num_selected), edges=str([x for x in xrange(0, 30, 2)]))\
                             .toImage(dims=tuple([num_selected + 2] + dims), preslice=slice(0, -num_features, 1))\
+                            .colorize()\
                             .toLightning(regression_viz, image_size, only_viz=True, plane=3)
 
         #analysis2 = Analysis.SeriesFilteringRegressionAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'fitted_series'),
