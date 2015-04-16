@@ -1,6 +1,6 @@
 from thunder_streaming.shell.examples.lightning_updater import LightningUpdater
 from thunder_streaming.site.configurations import *
-from tester_base import AnalysisPipeline
+from tester_base import *
 from lightning import Lightning
 from numpy import zeros
 import os
@@ -10,8 +10,8 @@ class NicksAnalysis(AnalysisPipeline):
     SAMPLE_DIR = "/tier2/freeman/streaming/sample_data/"
     DATA_PATH = "/groups/freeman/freemanlab/Streaming/anm_0216166_2013_07_17_run_01/"
 
-    def __init__(self, input_path, output_path):
-        super(NicksAnalysis, self).__init__(input_path, output_path)
+    def __init__(self, tssc, input_path, output_path):
+        super(NicksAnalysis, self).__init__(tssc, input_path, output_path)
         self.run_params.update({
             "parallelism": 320,
             "batch_time": 10,
@@ -76,11 +76,11 @@ class NicksAnalysis(AnalysisPipeline):
 
         #analysis2.receive_updates(analysis1)
 
-        tssc.add_analysis(analysis1)
+        self.tssc.add_analysis(analysis1)
 
         updaters = [
-        #    LightningUpdater(tssc, image_viz, analysis1.identifier)
+        #    LightningUpdater(self.tssc, image_viz, analysis1.identifier)
         ]
 
         for updater in updaters: 
-            tssc.add_updater(updater)
+            self.tssc.add_updater(updater)

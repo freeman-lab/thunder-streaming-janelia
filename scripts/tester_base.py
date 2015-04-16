@@ -36,13 +36,14 @@ class AnalysisPipeline(object):
     DATA_PATH = None
 
     @classmethod
-    def getInstance(cls):
+    def getInstance(cls, tssc):
         """
         Factory method for generating an AnalysisPipeline instance with the default input/output directories
         """
-        return cls(cls.DATA_PATH, cls.SAMPLE_DIR)
+        return cls(tssc, cls.DATA_PATH, cls.SAMPLE_DIR)
 
-    def __init__(self, input_path, output_path):
+    def __init__(self, tssc, input_path, output_path):
+        self.tssc = tssc
         self.input_path = input_path
         self.output_path = output_path
 
@@ -89,8 +90,8 @@ class AnalysisPipeline(object):
     # Attach all the parameters in the dictionary aboves to their respective objects
     def _attach_parameters(self): 
         for key, value in self.run_params.items():
-            tssc.__dict__['set_'+key](value)
-        tssc.set_checkpoint(self.dirs['checkpoint'])
+            self.tssc.__dict__['set_'+key](value)
+        self.tssc.set_checkpoint(self.dirs['checkpoint'])
 
     # Create the directories if they don't exist, clear them if they do
     def _set_up_directories(self): 
@@ -135,16 +136,9 @@ class AnalysisPipeline(object):
     def _generate_raw_test_data(self):
         pass
 
-    def _make_feeder(name="nick"):
-        conf = None
-        if name == "nick":
-            conf = NicksFeederConf
-        elif name == 'nikita':
-            conf = NikitasFeederConf
-        else:
-            conf = FeederConfiguration()
-
-        for key, value in self.feeder_params.items(): 
+    def _make_feeder():
+        conf = {}
+        for key, value in self.feeder_params.items():
             if value is not None: 
                 conf.__dict__['set_'+key](value)
             else: 
@@ -157,19 +151,19 @@ class AnalysisPipeline(object):
         proc = Popen(['python', 'copier.py', self.copier_params['behaviors_dir'], self.copier_params['images_dir'],
                         self.feeder_params['behaviors_dir'], self.feeder_params['images_dir'], str(delay)]) 
 
-    def run(self, feeder=None): 
+    def run(self, feeder=True):
 
         self._attach_parameters()
         self._set_up_directories() 
         if feeder: 
-            feeder_conf = self._make_feeder(name=feeder)
-            tssc.set_feeder_conf(feeder_conf)
+            feeder_conf = self._make_feeder()
+            self.tssc.set_feeder_conf(feeder_conf)
         if not feeder:
             self._generate_test_series([self.dirs['temp']])
 
         self.setup_pipeline()
 
-        tssc.start()
+        self.tssc.start()
 
         sleep_time = 10
         copy_delay = 0.5
