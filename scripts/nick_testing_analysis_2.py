@@ -22,7 +22,7 @@ class NicksAnalysis(AnalysisPipeline):
             "max_files": -1,
             "mod_buffer_time": 5,
             "poll_time": 5,
-            "images_prefix": "images",
+            "image_prefix": "images",
             "behaviors_prefix": "behaviours"
         })
 
