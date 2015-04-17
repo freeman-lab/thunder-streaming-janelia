@@ -50,15 +50,16 @@ class NicksAnalysis(AnalysisPipeline):
         num_selected = 1
         #image_viz = lgn.imagedraw(zeros(image_size))
         regression_viz = lgn.imagedraw(zeros(image_size))
+        mean_viz = lgn.imagedraw(zeros(image_size))
         behav_viz = lgn.linestreaming(zeros((1, 1)), size=1)
 
         #analysis1 = Analysis.SeriesBatchMeanAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'images'), prefix="output", format="binary")\
         #                    .toImage(dims=tuple(dims), preslice=slice(0,-3,1))\
         #                    .toLightning(image_viz, image_size, only_viz=True, plane=10)
-        #analysis2 = Analysis.SeriesMeanAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'mean'), 
-        #                                        prefix="mean", format="binary")\
-        #                    .toImage(dims=tuple(dims))\
-        #                    .toLightning(regression_viz, image_size, only_viz=True, plane=10)
+        analysis2 = Analysis.SeriesMeanAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'mean'),
+                                                prefix="mean", format="binary")\
+                            .toImage(dims=tuple(dims))\
+                            .toLightning(mean_viz, image_size, only_viz=True, plane=3)
         #analysis2 = Analysis.SeriesStatsAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'stats'), 
         #                                        prefix="stats", format="binary")\
         #                    .toImage(dims=tuple(dims))\
@@ -79,6 +80,7 @@ class NicksAnalysis(AnalysisPipeline):
         #analysis2.receive_updates(analysis1)
 
         self.tssc.add_analysis(analysis1)
+        self.tssc.add_analysis(analysis2)
 
         updaters = [
         #    LightningUpdater(self.tssc, image_viz, analysis1.identifier)
