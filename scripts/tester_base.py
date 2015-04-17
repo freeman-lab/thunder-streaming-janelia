@@ -149,7 +149,8 @@ class AnalysisPipeline(object):
 
     def _launch_copier(self, delay):
         proc = Popen(['python', 'copier.py', self.copier_params['behaviors_dir'], self.copier_params['images_dir'],
-                        self.feeder_params['behaviors_dir'], self.feeder_params['images_dir'], str(delay)]) 
+                        self.feeder_params['behaviors_dir'], self.feeder_params['images_dir'],
+                        self.feeder_params['images_prefix'], self.feeder_params['behaviors_prefix'], str(delay)])
 
     def run(self, feeder=True):
 
