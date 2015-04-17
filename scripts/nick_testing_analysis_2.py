@@ -68,7 +68,7 @@ class NicksAnalysis(AnalysisPipeline):
         analysis1 = Analysis.SeriesBinnedRegressionAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'weighted_mean'),
                                                       prefix="m", format="binary", dims=str(dims), num_regressors=str(num_features),
                                                       selected=str(num_selected), edges=str([x for x in xrange(0, 30, 2)]))\
-                            .toImage(dims=tuple([num_selected + 2] + dims), preslice=slice(0, -num_features, 1))\
+                            .toImage(dims=tuple(dims), preslice=slice(0, -num_features, 1))\
                             .colorize()\
                             .toLightning(regression_viz, image_size, only_viz=True, plane=3)
 
