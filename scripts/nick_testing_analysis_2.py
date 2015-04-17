@@ -58,7 +58,7 @@ class NicksAnalysis(AnalysisPipeline):
         #                    .toLightning(image_viz, image_size, only_viz=True, plane=10)
         analysis2 = Analysis.SeriesMeanAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'mean'),
                                                 prefix="mean", format="binary")\
-                            .toImage(dims=tuple(dims))\
+                            .toImage(dims=tuple(dims), preslice=slice(0, -num_features, 1))\
                             .toLightning(mean_viz, image_size, only_viz=True, plane=3)
         #analysis2 = Analysis.SeriesStatsAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'stats'), 
         #                                        prefix="stats", format="binary")\
