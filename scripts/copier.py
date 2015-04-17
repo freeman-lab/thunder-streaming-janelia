@@ -16,7 +16,7 @@ def get_matching_files(dir, regex):
     def matching_files_iter():
         for root, dirs, files in os.walk(dir):
             for file in files:
-                if regex.mach(file):
+                if regex.match(file):
                     yield os.path.join(root, file)
     return sorted([f for f in matching_files_iter()])
 
