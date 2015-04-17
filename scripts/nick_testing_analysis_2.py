@@ -23,7 +23,7 @@ class NicksAnalysis(AnalysisPipeline):
             "mod_buffer_time": 5,
             "poll_time": 5,
             "image_prefix": "images",
-            "behaviors_prefix": "behaviours"
+            "behaviors_prefix": "behaviour"
         })
 
         self.copier_params.update({

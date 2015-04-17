@@ -18,7 +18,8 @@ def get_matching_files(dir, regex):
             for file in files:
                 if regex.match(file):
                     yield os.path.join(root, file)
-    return sorted([f for f in matching_files_iter()])
+    sorted_files = sorted([f for f in matching_files_iter()])
+    return sorted_files
 
 for (f1, f2) in zip(get_matching_files(ephys_temp_dir, behav_re), get_matching_files(raw_temp_dir, img_re)):
     shutil.copy(os.path.join(ephys_temp_dir, f1), ephys_dir) 
