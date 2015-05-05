@@ -1,5 +1,5 @@
 from thunder_streaming.shell.examples.lightning_updater import LightningUpdater
-from thunder_streaming.shell.feeder_configuration import FeederConfiguration
+from thunder_streaming_janelia.feeder_configurations.configurations import FeederConfiguration
 from subprocess import Popen
 import os
 import glob
@@ -42,10 +42,11 @@ class AnalysisPipeline(object):
         """
         return cls(tssc, cls.DATA_PATH, cls.SAMPLE_DIR)
 
-    def __init__(self, tssc, input_path, output_path):
+    def __init__(self, tssc, input_path, output_path, feeder_conf=FeederConfiguration()):
         self.tssc = tssc
         self.input_path = input_path
         self.output_path = output_path
+        self.feeder_conf = feeder_conf
 
         self.dirs = {
             "checkpoint": os.path.join(self.output_path, "checkpoint"),
@@ -137,7 +138,7 @@ class AnalysisPipeline(object):
         pass
 
     def _make_feeder(self):
-        conf = FeederConfiguration()
+        conf = self.feeder_conf
         for key, value in self.feeder_params.items():
             if value is not None: 
                 conf.__dict__['set_'+key](value)
@@ -147,11 +148,39 @@ class AnalysisPipeline(object):
         print "make_feeder returning: %s" % conf
         return conf
 
+    def _build_regexes(self, regex_file): 
+        regex_lines = open(regex_file, 'r').readlines()
+        regexes = dict()
+        for line in regex_lines: 
+            splitted = line.split(' ')
+            regexes[splitted[0].strip()] = splitted[1].strip()
+        return regexes
+
     def _launch_copier(self, delay):
+        """
+        If the prefixes are specified, use those directly, else the regexes must be specified
+        """
+
+        image_prefix, behav_prefix = None, None
+
+        if 'image_prefix' in self.feeder_params: 
+            # If the prefixes are directly specified in the feeder params, use them
+            image_prefix = self.feeder_params['image_prefix'] 
+            behav_prefix = self.feeder_params['behaviors_prefix']
+        elif 'image_prefix' in self.feeder_conf.params: 
+            # If the prefixes are in the existing feeder configuration, use them 
+            image_prefix = self.feeder_conf.params['image_prefix'] 
+            behav_prefix = self.feeder_conf.params['behaviors_prefix']
+        elif 'prefix_regexes' in self.feeder_conf.params:
+            # If the prefixes aren't in either, then they must have been specified as prefix files 
+            regexes = self._build_regexes(self.feeder_conf.params['prefix_regexes'])
+            image_prefix = regexes['img']
+            behav_prefix = regexes['behav']
+
         proc = Popen(['python', 'copier.py', self.copier_params['behaviors_dir'], self.copier_params['images_dir'],
                         self.feeder_params['behaviors_dir'], self.feeder_params['images_dir'],
-                        self.feeder_params['image_prefix'], self.feeder_params['behaviors_prefix'], str(delay)])
-
+                        image_prefix, behav_prefix, str(delay)])
+            
     def run(self, feeder=True):
 
         self._attach_parameters()

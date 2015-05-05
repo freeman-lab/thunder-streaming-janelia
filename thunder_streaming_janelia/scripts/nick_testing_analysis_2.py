@@ -19,7 +19,7 @@ class NicksAnalysis(AnalysisPipeline):
 
         self.feeder_params.update({
             "linger_time": -1,
-            "max_files": -1,
+            "max_files": 40,
             "mod_buffer_time": 5,
             "poll_time": 5,
             "image_prefix": "images",
@@ -46,31 +46,50 @@ class NicksAnalysis(AnalysisPipeline):
 
         image_size = (512, 512)
         dims = [4, 512, 512]
-        num_features = 2
-        num_selected = 1
+        num_features = 3
+        num_selected = 3
+        scale_factor = int(4096 / 80.0)
+        edges = [x for x in xrange(0, 30 * scale_factor, 2 * scale_factor )]
         #image_viz = lgn.imagedraw(zeros(image_size))
-        regression_viz = lgn.imagedraw(zeros(image_size))
-        mean_viz = lgn.imagedraw(zeros(image_size))
+        r2_viz = lgn.imagepoly(zeros(image_size))
+        wm_viz = lgn.imagepoly(zeros(image_size))
+        mean_viz = lgn.imagepoly(zeros(image_size))
         behav_viz = lgn.linestreaming(zeros((1, 1)), size=1)
 
         #analysis1 = Analysis.SeriesBatchMeanAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'images'), prefix="output", format="binary")\
         #                    .toImage(dims=tuple(dims), preslice=slice(0,-3,1))\
         #                    .toLightning(image_viz, image_size, only_viz=True, plane=10)
+        #analysis1 = Analysis.SeriesNoopAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'noop'),
+        #                                        prefix="noop", format="binary")
+
         analysis2 = Analysis.SeriesMeanAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'mean'),
                                                 prefix="mean", format="binary")\
                             .toImage(dims=tuple(dims), preslice=slice(0, -num_features, 1))\
-                            .toLightning(mean_viz, image_size, only_viz=True, plane=3)
+                            .getPlane(2)\
+                            .clip(0, 500)\
+                            .toLightning(mean_viz, image_size, only_viz=True)
+
         #analysis2 = Analysis.SeriesStatsAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'stats'), 
         #                                        prefix="stats", format="binary")\
         #                    .toImage(dims=tuple(dims))\
         #                    .toLightning(regression_viz, image_size, only_viz=True, plane=10)
 
-        analysis1 = Analysis.SeriesBinnedRegressionAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'weighted_mean'),
+        analysis1 = Analysis.SeriesBinnedRegressionAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'binned_stats'),
                                                       prefix="m", format="binary", dims=str(dims), num_regressors=str(num_features),
-                                                      selected=str(num_selected), edges=str([x for x in xrange(0, 30, 2)]))\
-                            .toImage(dims=tuple(dims), preslice=slice(0, -num_features, 1))\
-                            .colorize()\
-                            .toLightning(regression_viz, image_size, only_viz=True, plane=3)
+                                                      selected=str(num_selected), edges=str(edges))
+        r2, weightedMean = analysis1.getMultiValues(sizes=[1, 1])
+        weightedMean.toImage(dims=tuple(dims), preslice=slice(0, -num_features, 1))\
+                            .getPlane(2)\
+                            .clip(0, 1550)\
+                            .colorize(vmax=1550)\
+                            .toLightning(wm_viz, image_size, only_viz=True)
+        r2.toImage(dims=tuple(dims), preslice=slice(0, -num_features, 1))\
+                            .getPlane(2)\
+                            .clip(0, 0.05)\
+                            .toLightning(r2_viz, image_size, only_viz=True)
+
+        analysis2 = Analysis.SeriesLinearRegressionAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'linear_regression'), prefix="m", format="binary", dims=str(dims), num_regressors=str(num_features), 
+                        selected=str([x for x in xrange(num_selected)]))
 
         #analysis2 = Analysis.SeriesFilteringRegressionAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'fitted_series'),
         #                                                        prefix="fitted", format="binary", partition_size="6", dims=str([41, 1024, 2048]),
@@ -79,8 +98,9 @@ class NicksAnalysis(AnalysisPipeline):
 
         #analysis2.receive_updates(analysis1)
 
-        self.tssc.add_analysis(analysis1)
+        #self.tssc.add_analysis(analysis1)
         self.tssc.add_analysis(analysis2)
+        #self.tssc.add_analysis(analysis1)
 
         updaters = [
         #    LightningUpdater(self.tssc, image_viz, analysis1.identifier)
