@@ -76,7 +76,7 @@ class NikitasAnalysis(AnalysisPipeline):
         #                    .toLightning(regression_viz, image_size, only_viz=True, plane=10)
         analysis2 = Analysis.SeriesLinearRegressionAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'regression'),
                                       prefix="r", format="binary", dims=str(dims), num_regressors=str(num_features),
-                                      selected=str([x for x in xrange(num_selected)]))\
+                                      selected=str([x for x in xrange(num_selected)]))
         r2, betas = analysis2.getMultiValues(sizes=[1, num_selected])
         r2.toImage(dims=tuple(dims), preslice=slice(0, -num_features, 1))\
                         .maxProject()\
