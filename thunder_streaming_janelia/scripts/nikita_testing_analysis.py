@@ -17,7 +17,7 @@ import signal
 class NikitasAnalysis(AnalysisPipeline): 
 
     SAMPLE_DIR = "/tier2/freeman/streaming/sample_data/" 
-    DATA_PATH = "/nobackup/freeman/andrew/nikitatest/"
+    DATA_PATH= "/tier2/ahrens/Nikita/realtime/"
 
     def __init__(self, tssc, input_path, output_path): 
         feeder_conf = NikitasFeederConf
@@ -29,8 +29,10 @@ class NikitasAnalysis(AnalysisPipeline):
         })
 
         self.feeder_params.update({ 
+            "images_dir": os.path.join(self.DATA_PATH, "imaging"),
+            "behaviors_dir": os.path.join(self.DATA_PATH, "ephys"),
             "linger_time": -1, 
-            "max_files": 40, 
+            "max_files": 80, 
             "mod_buffer_time": 5,
             "poll_time": 10,
             "check_size": None,
@@ -54,10 +56,11 @@ class NikitasAnalysis(AnalysisPipeline):
         lgn = Lightning("http://kafka1.int.janelia.org:3000/")
         lgn.create_session('nikita_test')
 
-        image_size = (512, 512)
+        image_size = (1024, 2048)
         dims = [41, 1024, 2048]
         num_features = 3
         num_selected = 3
+        selected = [x for x in xrange(num_selected)]
         #image_viz = lgn.imagepoly(zeros(image_size))
         r2_viz = lgn.imagepoly(zeros(image_size))
         #regression_viz = lgn.linestreaming(zeros((1, 1)), size=3)
@@ -76,14 +79,15 @@ class NikitasAnalysis(AnalysisPipeline):
         #                    .toLightning(regression_viz, image_size, only_viz=True, plane=10)
         analysis2 = Analysis.SeriesLinearRegressionAnalysis(input=self.dirs['input'], output=os.path.join(self.dirs['output'], 'regression'),
                                       prefix="r", format="binary", dims=str(dims), num_regressors=str(num_features),
-                                      selected=str([x for x in xrange(num_selected)]))
+                                      selected=str(selected))
         r2, betas = analysis2.getMultiValues(sizes=[1, num_selected])
-        r2.toImage(dims=tuple(dims), preslice=slice(0, -num_features, 1))\
-                        .maxProject()\
-                        .clip(0, 0.05)\
+        regressors = analysis2.toSeries().getRegressors(num_regressors=num_selected)\
+                        .toLightning(behav_viz, only_viz=True) 
+        r2.toImage(dims=tuple(dims)).maxProject().colorize(vmax=1)\
                         .toLightning(r2_viz, image_size, only_viz=True)
-        analysis2.toImage(dims=tuple([4] + dims), preslice=slice(0, -num_features, 1))\
+        analysis2.toImage(dims=tuple([5] + dims))\
                 .toFile(path=os.path.join(self.dirs['output'], 'regression'), prefix='output', fileType='tif')
+
 
         #analysis2 = Analysis.SeriesFilteringRegressionAnalysis(input=dirs['input'], output=os.path.join(dirs['output'], 'fitted_series'),
         #                                                        prefix="fitted", format="binary", partition_size="6", dims=str([41, 1024, 2048]),

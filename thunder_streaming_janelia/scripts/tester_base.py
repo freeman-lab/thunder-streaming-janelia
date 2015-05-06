@@ -202,6 +202,7 @@ class AnalysisPipeline(object):
         if not feeder: 
             self._copy_data()
         else: 
-            print "Copying data into feeder script's input directories..."
-            self._launch_copier(copy_delay)
+            #print "Copying data into feeder script's input directories..."
+            #self._launch_copier(copy_delay)
+            pass
 
