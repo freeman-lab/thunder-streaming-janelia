@@ -181,28 +181,28 @@ class AnalysisPipeline(object):
                         self.feeder_params['behaviors_dir'], self.feeder_params['images_dir'],
                         image_prefix, behav_prefix, str(delay)])
             
-    def run(self, feeder=True):
+    def run(self, copier=True):
 
+        # Clean existing directories and do initial setup
         self._attach_parameters()
         self._set_up_directories() 
-        if feeder: 
-            feeder_conf = self._make_feeder()
-            self.tssc.set_feeder_conf(feeder_conf)
-        if not feeder:
-            self._generate_test_series([self.dirs['temp']])
 
+        # Configure the feeder
+        feeder_conf = self._make_feeder()
+        self.tssc.set_feeder_conf(feeder_conf)
+
+        # Set up the analyses/outputs 
         self.setup_pipeline()
 
+        # Start the Scala process
         self.tssc.start()
 
-        sleep_time = 10
-        copy_delay = 0.5
-        print "Sleeping for %d seconds..." % sleep_time
-        time.sleep(sleep_time)
-        if not feeder: 
-            self._copy_data()
-        else: 
-            #print "Copying data into feeder script's input directories..."
-            #self._launch_copier(copy_delay)
-            pass
+        # If data needs to be generated for the feeder, start the copier process
+        if copier: 
+            sleep_time = 10
+            copy_delay = 0.5
+            print "Sleeping for %d seconds before copying data..." % sleep_time
+            time.sleep(sleep_time)
+            print "Copying data into feeder script's input directories..."
+            self._launch_copier(copy_delay)
 
